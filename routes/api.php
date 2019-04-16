@@ -17,9 +17,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-Route::get('blogs','BlogController@index');
-Route::post('blog','BlogController@store');
-Route::get('blogs/{id}','BlogController@show');
-Route::put('blogs/{id}','BlogController@update');
-Route::delete('blogs/{id}','BlogController@destroy');
+Route::post('login', 'Api\AuthController@login');
+Route::post('register', 'Api\AuthController@register');
+ 
+Route::get('blogs','Api\BlogController@index');
+Route::post('blog','Api\BlogController@store');
+Route::get('blogs/{id}','Api\BlogController@show');
+Route::put('blogs/{id}','Api\BlogController@update');
+Route::delete('blogs/{id}','Api\BlogController@destroy');
