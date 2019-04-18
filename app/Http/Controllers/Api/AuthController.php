@@ -43,8 +43,14 @@ class AuthController extends Controller
         ];
  
         if (auth()->attempt($credentials)) {
-            $token = auth()->user()->createToken($request->email)->accessToken;
-            return response()->json(['token' => $token], 200);
+            $user = auth()->user();
+            $token = $user->createToken($request->email)->accessToken;
+            return response()->json([                
+                'user' => $user,
+                'token_type' => 'Bearer',
+                'token' => $token
+
+            ], 200);
         } else {
             return response()->json(['error' => 'UnAuthorised'], 401);
         }
@@ -60,4 +66,19 @@ class AuthController extends Controller
         return response()->json(['user' => auth()->user()], 200);
     }
 
+
+    /**
+     * Logout user (Revoke the token)
+     *
+     * @return [string] message
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->token()->revoke();
+        return response()->json([
+            'message' => 'Successfully logged out'
+        ]);
+    }
+
 }
+
