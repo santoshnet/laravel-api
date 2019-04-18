@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\User;
 use Validator;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\RegisterActivate;
+use App\Notifications\RegisterActivated;
 
 class AuthController extends Controller
 {
@@ -21,14 +23,47 @@ class AuthController extends Controller
        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password),
+            'activation_token' => str_random(60)
+
         ]);
+
+         $user->notify(new RegisterActivate($user));
 
         $token = $user->createToken($request->name)->accessToken;
  
         return response()->json(['token' => $token], 201);
        
     }
+
+
+      /**
+     * Confirm your account user (Activate)
+     *
+     * @param  [type] $token
+     * @return [string] message
+     * @return [obj] user
+     */
+    public function registerActivate($token)
+    {
+        $user = User::where('activation_token', $token)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => __('auth.token_invalid')
+            ], 404);
+        }
+
+        $user->active = true;
+        $user->activation_token = '';
+        $user->save();
+
+        $user->notify(new RegisterActivated($user));
+
+        return $user;
+    }
+
+
      /**
      * Handles Login Request
      *

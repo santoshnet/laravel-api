@@ -34,6 +34,8 @@ Route::group([
 
 Route::post('login', 'Api\AuthController@login');
 Route::post('register', 'Api\AuthController@register');
+ Route::get('register/activate/{token}', 'Api\AuthController@registerActivate');
+
  
 Route::get('blogs','Api\BlogController@index');
 Route::post('blog','Api\BlogController@store');

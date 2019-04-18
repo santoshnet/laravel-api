@@ -71,7 +71,7 @@ class PasswordResetController extends Controller
     {
         $request->validate([
             'email' => 'required|string|email',
-            'password' => 'required|string|confirmed',
+            'password' => 'required|min:6',
             'token' => 'required|string'
         ]);
         $passwordReset = PasswordReset::where([
