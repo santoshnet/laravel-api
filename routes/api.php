@@ -19,8 +19,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::group(['middleware' => 'auth:api'], function(){
-    Route::post('details', 'Api\AuthController@details');
+    Route::get('details', 'Api\AuthController@details');
     Route::get('logout', 'Api\AuthController@logout');
+    Route::get('blogs','Api\BlogController@index');
+    Route::post('blog','Api\BlogController@store');
+    Route::get('blogs/{id}','Api\BlogController@show');
+    Route::post('blogs/{id}','Api\BlogController@update');
+    Route::delete('blogs/{id}','Api\BlogController@destroy');
 });
 
 Route::group([
@@ -37,8 +42,3 @@ Route::post('register', 'Api\AuthController@register');
  Route::get('register/activate/{token}', 'Api\AuthController@registerActivate');
 
  
-Route::get('blogs','Api\BlogController@index');
-Route::post('blog','Api\BlogController@store');
-Route::get('blogs/{id}','Api\BlogController@show');
-Route::put('blogs/{id}','Api\BlogController@update');
-Route::delete('blogs/{id}','Api\BlogController@destroy');

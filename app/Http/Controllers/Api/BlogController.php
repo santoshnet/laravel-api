@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Input;
 use App\Http\Requests;
 use App\Blog;
 use App\Http\Resources\Blog as BlogResource;
+use Validator;
 
 class BlogController extends Controller
 {
@@ -18,10 +19,14 @@ class BlogController extends Controller
      */
     public function index()
     {
+       
         $blogs = Blog::paginate(15);
         return BlogResource::collection($blogs)
         ->response()
         ->setStatusCode(200);
+        
+       
+       
     }
 
     
@@ -33,8 +38,16 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
+
+         $this->validate($request, [
+            'title' => 'required',
+            'body' => 'required'
+        ]);
+
+       
+
         $blog = new Blog(input::all());
-        if($blog->save())
+        if(auth()->user()->blogs()->save($blog))
         {
            return new BlogResource($blog);
         }
@@ -51,11 +64,6 @@ class BlogController extends Controller
         $blog = Blog::findOrFail($id);
          return new BlogResource($blog);
              
-
-        
-        // return (new BlogResource($blog))
-        //         ->response()
-        //         ->setStatusCode(200);
     }
 
    
@@ -69,13 +77,41 @@ class BlogController extends Controller
     public function update(Request $request, $id)
     {
 
-        $blog = Blog::findOrFail($request->id);
-        $blog->update(Input::all());
 
-        if($blog->save())
-        {
-            return new BlogResource($blog);
+      $blog = auth()->user()->blogs()->findOrFail($id);
+
+        $input = $request->all();
+        $validator = Validator::make($input, [
+
+            'title' => 'required',
+
+            'body' => 'required'
+
+        ]);
+
+ 
+        if (!$blog) {
+            return response()->json([
+                'success' => false,
+                'message' => 'blog with id ' . $id . ' not found'
+            ], 400);
         }
+    
+        if ( $blog->fill($input)->save())
+           return new BlogResource($blog);
+        else
+            return response()->json([
+                'success' => false,
+                'message' => 'blog could not be updated'
+            ], 500);
+
+        // $blog = auth()->user()->blogs()->find($id);
+        // //$blog->update(Input::all());
+
+        // if($blog->fill($request->all())->save())
+        // {
+        //     return new BlogResource($blog);
+        // }
        
     }
 
@@ -87,10 +123,24 @@ class BlogController extends Controller
      */
     public function destroy($id)
     {
-        $blog = Blog::findOrFail($id);
-
-        $blog->delete();
-
-        return new BlogResource($blog);
+        $blog = auth()->user()->blogs()->find($id);
+ 
+        if (!$blog) {
+            return response()->json([
+                'success' => false,
+                'message' => 'blog with id ' . $id . ' not found'
+            ], 400);
+        }
+ 
+        if ($blog->delete()) {
+            return response()->json([
+                'success' => true
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'blog could not be deleted'
+            ], 500);
+        }
     }
 }
