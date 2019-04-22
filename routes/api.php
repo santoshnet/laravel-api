@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::group(['middleware' => 'auth:api'], function(){
-    Route::get('details', 'Api\AuthController@details');
+    Route::get('user_details', 'Api\AuthController@details');
     Route::get('logout', 'Api\AuthController@logout');
     Route::get('blogs','Api\BlogController@index');
     Route::post('blog','Api\BlogController@store');
